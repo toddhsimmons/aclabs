@@ -1,0 +1,212 @@
+---
+# --------------------------------------------------------------
+# Custom 2-Spine, 4-Leaf, 4-Host Topology
+# --------------------------------------------------------------
+
+name: ace-l1-practice1
+prefix: ""
+
+mgmt:
+  network: mgmt
+  ipv4-subnet: 172.100.100.0/24
+
+topology:
+  defaults:
+    env:
+      INTFTYPE: et
+
+  kinds:
+    ceos:
+      image: arista/ceos:latest
+    linux:
+      image: ghcr.io/aristanetworks/aclabs/host-ubuntu:rev1.0
+      binds:
+        - /workspaces/aclabs/labs/ACE_L1_Practice-1:/workspace:ro
+
+  nodes:
+    #########################
+    # SPINES
+    #########################
+    SPINE1:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.101
+      binds:
+        - sn/spine1.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/SPINE1.cfg
+      labels:
+        topoViewer-role: spine
+        graph-group: "Data Center Spine"
+        graph-level: "3"
+        graph-posX: "-80"
+        graph-posY: "100"
+        graph-groupLabelPos: bottom-center
+
+    SPINE2:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.102
+      binds:
+        - sn/spine2.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/SPINE2.cfg
+      labels:
+        topoViewer-role: spine
+        graph-group: "Data Center Spine"
+        graph-level: "3"
+        graph-posX: "0"
+        graph-posY: "100"
+        graph-groupLabelPos: bottom-center
+
+    #########################
+    # LEAFS
+    #########################
+    LEAF1:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.105
+      binds:
+        - sn/leaf1.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/LEAF1.cfg
+      labels:
+        topoViewer-role: leaf
+        graph-group: "Data Center Leaf"
+        graph-level: "4"
+        graph-posX: "-120"
+        graph-posY: "180"
+        graph-groupLabelPos: bottom-center
+
+    LEAF2:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.106
+      binds:
+        - sn/leaf2.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/LEAF2.cfg
+      labels:
+        topoViewer-role: leaf
+        graph-group: "Data Center Leaf"
+        graph-level: "4"
+        graph-posX: "-40"
+        graph-posY: "180"
+        graph-groupLabelPos: bottom-center
+
+    LEAF3:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.107
+      binds:
+        - sn/leaf3.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/LEAF3.cfg
+      labels:
+        topoViewer-role: leaf
+        graph-group: "Data Center Leaf"
+        graph-level: "4"
+        graph-posX: "40"
+        graph-posY: "180"
+        graph-groupLabelPos: bottom-center
+
+    LEAF4:
+      kind: ceos
+      mgmt-ipv4: 172.100.100.108
+      binds:
+        - sn/leaf4.txt:/mnt/flash/ceos-config:ro
+      startup-config: init-configs/LEAF4.cfg
+      labels:
+        topoViewer-role: leaf
+        graph-group: "Data Center Leaf"
+        graph-level: "4"
+        graph-posX: "120"
+        graph-posY: "180"
+        graph-groupLabelPos: bottom-center
+
+    #########################
+    # HOSTS
+    #########################
+    HOST1:
+      kind: linux
+      mgmt-ipv4: 172.100.100.201
+      env:
+        IPV4: 10.10.10.101/24
+        GW: 10.10.10.1
+      labels:
+        topoViewer-role: client
+        graph-group: "Data Center Host"
+        graph-level: "5"
+        graph-posX: "-120"
+        graph-posY: "260"
+        graph-groupLabelPos: bottom-center
+
+    HOST2:
+      kind: linux
+      mgmt-ipv4: 172.100.100.202
+      env:
+        IPV4: 10.10.10.102/24
+        GW: 10.10.10.1
+      labels:
+        topoViewer-role: client
+        graph-group: "Data Center Host"
+        graph-level: "5"
+        graph-posX: "-40"
+        graph-posY: "260"
+        graph-groupLabelPos: bottom-center
+
+    HOST3:
+      kind: linux
+      mgmt-ipv4: 172.100.100.203
+      env:
+        IPV4: 10.10.10.103/24
+        GW: 10.10.10.1
+      labels:
+        topoViewer-role: client
+        graph-group: "Data Center Host"
+        graph-level: "5"
+        graph-posX: "40"
+        graph-posY: "260"
+        graph-groupLabelPos: bottom-center
+
+    HOST4:
+      kind: linux
+      mgmt-ipv4: 172.100.100.204
+      env:
+        IPV4: 10.10.10.104/24
+        GW: 10.10.10.1
+      labels:
+        topoViewer-role: client
+        graph-group: "Data Center Host"
+        graph-level: "5"
+        graph-posX: "120"
+        graph-posY: "260"
+        graph-groupLabelPos: bottom-center
+
+  links:
+    ######################
+    # Spine-to-Spine
+    ######################
+    - endpoints: [ "SPINE1:et1", "SPINE2:et1" ]
+    - endpoints: [ "SPINE1:et2", "SPINE2:et2" ]
+
+    ######################
+    # Spines to Leafs (3–6)
+    ######################
+    - endpoints: [ "SPINE1:et3", "LEAF1:et3" ]
+    - endpoints: [ "SPINE1:et4", "LEAF2:et3" ]
+    - endpoints: [ "SPINE1:et5", "LEAF3:et3" ]
+    - endpoints: [ "SPINE1:et6", "LEAF4:et3" ]
+
+    - endpoints: [ "SPINE2:et3", "LEAF1:et4" ]
+    - endpoints: [ "SPINE2:et4", "LEAF2:et4" ]
+    - endpoints: [ "SPINE2:et5", "LEAF3:et4" ]
+    - endpoints: [ "SPINE2:et6", "LEAF4:et4" ]
+
+    ########################
+    # Leaf-to-Leaf
+    ########################
+    - endpoints: [ "LEAF1:et1", "LEAF2:et1" ]
+    - endpoints: [ "LEAF1:et2", "LEAF2:et2" ]
+    - endpoints: [ "LEAF3:et1", "LEAF4:et1" ]
+    - endpoints: [ "LEAF3:et2", "LEAF4:et2" ]
+
+    ########################
+    # Leafs to Hosts
+    ########################
+    - endpoints: [ "LEAF1:et7", "HOST1:eth1" ]
+    - endpoints: [ "LEAF1:et9", "HOST2:eth1" ]
+    - endpoints: [ "LEAF2:et7", "HOST1:eth2" ]
+    - endpoints: [ "LEAF2:et9", "HOST2:eth2" ]
+    - endpoints: [ "LEAF3:et7", "HOST3:eth1" ]
+    - endpoints: [ "LEAF4:et7", "HOST4:eth1" ]
